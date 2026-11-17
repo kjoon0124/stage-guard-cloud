@@ -990,3 +990,102 @@ def main():
 if __name__ == "__main__":
     main()
 
+import os
+import pandas as pd
+import plotly.express as px
+import streamlit as st
+from supabase import create_client
+
+# Supabase 클라우드 연결 설정 (Streamlit Secrets 또는 환경 변수 활용)
+SUPABASE_URL = st.secrets.get("SUPABASE_URL", os.environ.get("SUPABASE_URL", ""))
+SUPABASE_KEY = st.secrets.get("SUPABASE_KEY", os.environ.get("SUPABASE_KEY", ""))
+
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+st.set_page_config(page_title="StageGuard Cloud", layout="wide")
+st.title("🎭 StageGuard Cloud: 무대 설비 작업 위험성 평가 및 동선 시뮬레이터")
+
+st.sidebar.header("📋 작업 및 위험성 평가 입력")
+
+with st.sidebar.form("risk_form"):
+  task_name = st.text_input(
+      "작업명 (예: 조명 바텐 승하강, 음향 스피커 설치)"
+  )
+  x_coord = st.slider("무대 X 좌표 (m)", 0.0, 20.0, 10.0)
+  y_coord = st.slider("무대 Y 좌표 (m)", 0.0, 15.0, 7.5)
+  likelihood = st.number_input("가능성 (Likelihood, 1~5)", 1, 5, 3)
+  severity = st.number_input("중대성 (Severity, 1~5)", 1, 5, 3)
+  memo = st.text_area("현장 안전 특이사항 및 조치 계획")
+
+  submitted = st.form_submit_button("위험성 평가 등록")
+
+if submitted:
+  score = likelihood * severity
+  if score >= 15:
+    grade = "Red (고위험)"
+  elif score >= 8:
+    grade = "Yellow (중위험)"
+  else:
+    grade = "Green (저위험)"
+
+  # Supabase 데이터 삽입
+  data = {
+      "task_name": task_name,
+      "x_coord": x_coord,
+      "y_coord": y_coord,
+      "likelihood": likelihood,
+      "severity": severity,
+      "risk_score": score,
+      "risk_grade": grade,
+      "memo": memo,
+  }
+
+  response = supabase.table("risk_assessments").insert(data).execute()
+  st.success(
+      f"작업 [{task_name}] 클라우드 등록 완료! (위험 점수: {score}, 등급:"
+      f" {grade})"
+  )
+  st.rerun()
+
+# 데이터 조회 및 시각화
+st.subheader("📊 클라우드 저장소 연동 작업 현황 및 위험 매트릭스")
+
+response = supabase.table("risk_assessments").select("*").execute()
+rows = response.data
+
+if rows:
+  df = pd.DataFrame(rows)
+
+  fig = px.scatter(
+      df,
+      x="x_coord",
+      y="y_coord",
+      color="risk_grade",
+      size="risk_score",
+      hover_data=["task_name", "memo"],
+      title="무대 2D 레이아웃 작업별 위험도 분포 (Cloud)",
+      color_discrete_map={
+          "Red (고위험)": "red",
+          "Yellow (중위험)": "orange",
+          "Green (저위험)": "green",
+      },
+  )
+  fig.update_layout(xaxis_range=[0, 20], yaxis_range=[0, 15])
+  st.plotly_chart(fig, use_container_width=True)
+
+  st.dataframe(df)
+else:
+  st.info(
+      "등록된 데이터가 없습니다. 왼쪽 사이드바에서 첫 번째 무대 작업을 등록해"
+      " 주세요!"
+  )
+  from flask import Flask
+
+app = Flask(__name__) # Vercel이 찾는 필수 변수명입니다.
+
+@app.route('/')
+def index():
+    return "StageGuard Cloud is running!"
+
+if __name__ == '__main__':
+    app.run()
