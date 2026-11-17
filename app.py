@@ -1059,20 +1059,16 @@ if rows:
   else:
     df = pd.DataFrame()
 
-  fig = px.scatter(
-      df,
-      x="x_coord",
-      y="y_coord",
-      color="risk_grade",
-      size="risk_score",
-      hover_data=["task_name", "memo"],
-      title="무대 2D 레이아웃 작업별 위험도 분포 (Cloud)",
-      color_discrete_map={
-          "Red (고위험)": "red",
-          "Yellow (중위험)": "orange",
-          "Green (저위험)": "green",
-      },
-  )
+  if not df.empty and '원하는컬럼명' in df.columns:
+    fig = px.scatter(
+        df,
+        x="X축_컬럼명",
+        y="Y축_컬럼명",
+        # ... 기존에 사용하던 인자들 유지 ...
+    )
+    st.plotly_chart(fig)
+  else:
+    st.info("표시할 데이터가 없습니다. Supabase 테이블에 데이터를 먼저 추가해주세요.")
   fig.update_layout(xaxis_range=[0, 20], yaxis_range=[0, 15])
   st.plotly_chart(fig, use_container_width=True)
 
