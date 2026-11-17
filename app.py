@@ -1059,17 +1059,18 @@ if rows:
   else:
     df = pd.DataFrame()
 
-  if not df.empty and '원하는컬럼명' in df.columns:
+  if not df.empty:  # 또는 기존에 사용하던 조건문
     fig = px.scatter(
         df,
         x="X축_컬럼명",
         y="Y축_컬럼명",
-        # ... 기존에 사용하던 인자들 유지 ...
+        # ... 기존 설정들 ...
     )
+    # fig.update_layout을 if 블록 안으로 이동!
+    fig.update_layout(xaxis_range=[0, 20], yaxis_range=[0, 15])
     st.plotly_chart(fig)
   else:
     st.info("표시할 데이터가 없습니다. Supabase 테이블에 데이터를 먼저 추가해주세요.")
-  fig.update_layout(xaxis_range=[0, 20], yaxis_range=[0, 15])
   st.plotly_chart(fig, use_container_width=True)
 
   st.dataframe(df)
