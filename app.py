@@ -1052,41 +1052,5 @@ if submitted:
       f" {grade})"
   )
   st.rerun()
+  
 
-# 데이터 조회 및 시각화
-st.subheader("📊 클라우드 저장소 연동 작업 현황 및 위험 매트릭스")
-
-response = supabase.table("risk_assessments").select("*").execute()
-rows = response.data
-
-if rows:
-  if rows and isinstance(rows, list) and len(rows) > 0:
-    df = pd.DataFrame(rows)
-  else:
-    df = pd.DataFrame()
-
-  fig = None
-
-  if not df.empty:
-    fig = px.scatter(
-        df,
-        x="X축_컬럼명",
-        y="Y축_컬럼명",
-    )
-    fig.update_layout(xaxis_range=[0, 20], yaxis_range=[0, 15])
-
-# fig가 존재할 때만 안전하게 출력
-  import plotly.graph_objects as go
-
-# fig가 올바른 Plotly Figure 객체인지 확인하고 출력
-  if fig is not None and isinstance(fig, go.Figure):
-    st.plotly_chart(fig, use_container_width=True)
-  else:
-    st.info("표시할 유효한 그래프 데이터가 없습니다. 입력값이나 Supabase 데이터를 확인해주세요.")
-
-  st.dataframe(df)
-else:
-  st.info(
-      "등록된 데이터가 없습니다. 왼쪽 사이드바에서 첫 번째 무대 작업을 등록해"
-      " 주세요!"
-  )
