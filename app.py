@@ -997,8 +997,14 @@ import streamlit as st
 from supabase import create_client
 
 # Supabase 클라우드 연결 설정 (Streamlit Secrets 또는 환경 변수 활용)
-SUPABASE_URL = st.secrets.get("SUPABASE_URL", os.environ.get("SUPABASE_URL", ""))
-SUPABASE_KEY = st.secrets.get("SUPABASE_KEY", os.environ.get("SUPABASE_KEY", ""))
+import os
+
+try:
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+except Exception:
+    SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+    SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
