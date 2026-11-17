@@ -1090,13 +1090,3 @@ else:
       "등록된 데이터가 없습니다. 왼쪽 사이드바에서 첫 번째 무대 작업을 등록해"
       " 주세요!"
   )
-  from flask import Flask
-
-app = Flask(__name__) # Vercel이 찾는 필수 변수명입니다.
-
-@app.route('/')
-def index():
-    return "StageGuard Cloud is running!"
-
-if __name__ == '__main__':
-    app.run()
