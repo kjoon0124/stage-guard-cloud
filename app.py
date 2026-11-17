@@ -1065,20 +1065,24 @@ if rows:
   else:
     df = pd.DataFrame()
 
+  fig = None
+
   if not df.empty:
     fig = px.scatter(
         df,
         x="X축_컬럼명",
         y="Y축_컬럼명",
-        # ... 기존 설정 ...
     )
     fig.update_layout(xaxis_range=[0, 20], yaxis_range=[0, 15])
-    
-    # st.plotly_chart를 이 안으로 이동!
+
+# fig가 존재할 때만 안전하게 출력
+  import plotly.graph_objects as go
+
+# fig가 올바른 Plotly Figure 객체인지 확인하고 출력
+  if fig is not None and isinstance(fig, go.Figure):
     st.plotly_chart(fig, use_container_width=True)
   else:
-    st.info("표시할 데이터가 없습니다. Supabase 테이블에 데이터를 먼저 추가해주세요.")
-  st.plotly_chart(fig, use_container_width=True)
+    st.info("표시할 유효한 그래프 데이터가 없습니다. 입력값이나 Supabase 데이터를 확인해주세요.")
 
   st.dataframe(df)
 else:
