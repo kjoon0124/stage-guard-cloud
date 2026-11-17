@@ -1054,10 +1054,10 @@ response = supabase.table("risk_assessments").select("*").execute()
 rows = response.data
 
 if rows:
-  if rows:
+  if rows and isinstance(rows, list) and len(rows) > 0:
     df = pd.DataFrame(rows)
   else:
-    df = pd.DataFrame() # 데이터가 없을 경우 빈 데이터프레임 생성
+    df = pd.DataFrame()
 
   fig = px.scatter(
       df,
